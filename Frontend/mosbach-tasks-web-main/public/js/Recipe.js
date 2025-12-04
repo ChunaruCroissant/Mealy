@@ -38,7 +38,7 @@ $(document).ready(function() {
     };
 
     $.ajax({
-      url: 'https://mealybackend-fearless-bushbuck-kc.apps.01.cf.eu01.stackit.cloud/api/recipe',
+      url: 'http://localhost:8080/api/recipe',
       type: 'POST',
       contentType: 'application/json',
       data: JSON.stringify(recipeData),
@@ -47,14 +47,9 @@ $(document).ready(function() {
       },
       success: function(data) {
         console.log("Antwort von der API erhalten:", data);
-
-        if (data && JSON.stringify(data).includes("Recipe successfully created")) {
-          alert('Rezept erfolgreich erstellt!');
-          window.location.href = 'RecipeCollection.html';
-        } else {
-          console.log("Rezept-Erstellung fehlgeschlagen: ", data.reason || 'Unbekannter Fehler.');
-          alert('Fehler beim Erstellen des Rezepts: ' + (data.reason || 'Bitte versuche es später erneut.'));
-        }
+        alert('Rezept erfolgreich erstellt!');
+        window.location.href = 'RecipeCollection.html';
+        
       },
       error: function(xhr, ajaxOptions, thrownError) {
         console.error('Fehler:', thrownError);
@@ -71,7 +66,7 @@ $(document).ready(function() {
           console.error('Fehler beim Parsen der Antwort:', e);
         }
 
-        alert(responseMessage);
+        alert(responseMessage);}
     });
   });
 });

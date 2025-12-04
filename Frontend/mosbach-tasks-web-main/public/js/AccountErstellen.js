@@ -3,8 +3,8 @@ $(document).ready(function() {
     event.preventDefault();
 
     var loginData = {
-      email: $("#email").val(),
       username: $("#username").val(),
+      email: $("#email").val(),
       password: $("#password").val(),
       passwordConfirm: $("#passwordConfirm").val(),
     };
@@ -21,20 +21,15 @@ $(document).ready(function() {
     console.log("Daten, die gesendet werden:", loginData);
 
     $.ajax({
-      url: 'https://MealyBackend-fearless-bushbuck-kc.apps.01.cf.eu01.stackit.cloud/api/register',
+      url: 'http://localhost:8080/api/register',
       type: 'POST',
       dataType: 'json',
       contentType: 'application/json; charset=utf-8',
       data: JSON.stringify(loginData),
       success: function(response) {
         console.log("Serverantwort:", response);
-        if (response.message === "Account successfully registered") {
-          console.log("Registrierung erfolgreich. Weiterleitung zur Bestätigungsseite.");
-          window.location.href = 'RegistBestätigung.html';
-        } else {
-          console.log("Registrierung fehlgeschlagen:", response.reason);
-          alert(response.reason || "Registrierung fehlgeschlagen");
-        }
+        console.log("Registrierung erfolgreich. Weiterleitung zur Bestätigungsseite.");
+        window.location.href = 'RegistBestätigung.html';
       },
       error: function(xhr, ajaxOptions, thrownError) {
         console.log('Fehlerstatus: ' + xhr.status);

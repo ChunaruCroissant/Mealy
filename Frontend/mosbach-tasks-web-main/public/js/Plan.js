@@ -24,7 +24,7 @@ $(document).ready(function() {
 function fetchPlans() {
     const token = getToken();
     $.ajax({
-        url: 'https://MealyBackend-fearless-bushbuck-kc.apps.01.cf.eu01.stackit.cloud/plan',
+        url: 'http://localhost:8080/plan',
         type: 'GET',
         contentType: 'application/json',
         headers: {
@@ -53,7 +53,7 @@ function createFolder() {
 
     const token = getToken();
     $.ajax({
-        url: 'https://MealyBackend-fearless-bushbuck-kc.apps.01.cf.eu01.stackit.cloud/plan',
+        url: 'http://localhost:8080/plan',
         type: 'POST',
         contentType: 'application/json',
         headers: {
@@ -102,7 +102,7 @@ function deleteFolder(planId) {
     const token = getToken();
 
     $.ajax({
-        url: `https://MealyBackend-fearless-bushbuck-kc.apps.01.cf.eu01.stackit.cloud/plan/${planId}`, // Korrekte Verwendung von Template-Strings
+        url: `http://localhost:8080/plan/${planId}`, // Korrekte Verwendung von Template-Strings
         type: 'DELETE',
         contentType: 'application/json',
         headers: {
@@ -130,7 +130,7 @@ function editFolder(planId, currentName) {
     const token = getToken();
 
     $.ajax({
-        url: 'https://MealyBackend-fearless-bushbuck-kc.apps.01.cf.eu01.stackit.cloud/plan/${planId}',
+        url: 'http://localhost:8080/plan/${planId}',
         type: 'PUT',
         contentType: 'application/json',
         headers: {

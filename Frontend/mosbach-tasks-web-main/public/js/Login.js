@@ -16,7 +16,7 @@ $(document).ready(function() {
     console.log("Login-Daten gesammelt:", loginData);
 
     $.ajax({
-      url: 'https://MealyBackend-fearless-bushbuck-kc.apps.01.cf.eu01.stackit.cloud/api/login',
+      url: 'http://localhost:8080/api/login',
       type: 'POST',
       dataType: 'json',
       contentType: 'application/json; charset=utf-8',

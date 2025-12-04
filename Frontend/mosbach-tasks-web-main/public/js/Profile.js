@@ -10,7 +10,7 @@ $(document).ready(function() {
 
     function getProfileData() {
         $.ajax({
-            url: 'https://MealyBackend-fearless-bushbuck-kc.apps.01.cf.eu01.stackit.cloud/api/user',
+            url: 'http://localhost:8080/api/user',
             type: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -55,7 +55,7 @@ $(document).ready(function() {
         };
 
         $.ajax({
-            url: 'https://MealyBackend-fearless-bushbuck-kc.apps.01.cf.eu01.stackit.cloud/api/user',
+            url: 'http://localhost:8080/api/user',
             type: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -80,7 +80,7 @@ $(document).ready(function() {
 
         if (confirm('Möchtest du wirklich deinen Account löschen?')) {
             $.ajax({
-                url: 'https://MealyBackend-fearless-bushbuck-kc.apps.01.cf.eu01.stackit.cloud/api/user',
+                url: 'http://localhost:8080/api/user',
                 type: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',

@@ -22,13 +22,18 @@ import java.util.logging.Logger;
 @RequestMapping("/api")
 public class MappingController {
 
-    RecipeManager recipeManager = RecipeManager.getRecipeManager();
+    private final RecipeManager recipeManager;
+    private final UserManager userManger;
+    private final MealManager mealManager;
+
     TaskManager taskManager = TaskManagerImpl.getTaskManagerImpl();
-    UserManager userManger = UserManager.getUserManager();
-    MealManager mealManager = MealManager.getMealManager();
     MealPlanConverter mealPlanConverter = MealPlanConverter.getMealPlanConverter();
 
-    public MappingController() {}
+    public MappingController(RecipeManager recipeManager, UserManager userManger, MealManager mealManager) {
+        this.recipeManager = recipeManager;
+        this.userManger = userManger;
+        this.mealManager = mealManager;
+    }
 
     @PostMapping(
             path = "/register",

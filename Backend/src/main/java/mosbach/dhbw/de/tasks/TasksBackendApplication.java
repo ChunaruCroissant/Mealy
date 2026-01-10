@@ -4,7 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 
-@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class })
+@SpringBootApplication //(exclude = {DataSourceAutoConfiguration.class }) Auskommentiert da das die DB behindert -RL
 public class TasksBackendApplication {
 
     public static void main(String[] args) {

@@ -22,6 +22,34 @@ public class RecipeEntity {
     @Column(columnDefinition = "text")
     private String description;
 
+    // --- Nutrition (nullable, because API may fail / not present) ---
+    @Column(name = "calories_kcal")
+    private Double caloriesKcal;
+
+    @Column(name = "total_fat_g")
+    private Double totalFatG;
+
+    @Column(name = "saturated_fat_g")
+    private Double saturatedFatG;
+
+    @Column(name = "cholesterol_mg")
+    private Double cholesterolMg;
+
+    @Column(name = "sodium_mg")
+    private Double sodiumMg;
+
+    @Column(name = "total_carbohydrates_g")
+    private Double totalCarbohydratesG;
+
+    @Column(name = "dietary_fiber_g")
+    private Double dietaryFiberG;
+
+    @Column(name = "sugars_g")
+    private Double sugarsG;
+
+    @Column(name = "protein_g")
+    private Double proteinG;
+
     @ElementCollection
     @CollectionTable(
             name = "recipe_ingredient",
@@ -68,4 +96,31 @@ public class RecipeEntity {
     public void setOwner(UserEntity owner) {
         this.owner = owner;
     }
+
+    public Double getCaloriesKcal() { return caloriesKcal; }
+    public void setCaloriesKcal(Double caloriesKcal) { this.caloriesKcal = caloriesKcal; }
+
+    public Double getTotalFatG() { return totalFatG; }
+    public void setTotalFatG(Double totalFatG) { this.totalFatG = totalFatG; }
+
+    public Double getSaturatedFatG() { return saturatedFatG; }
+    public void setSaturatedFatG(Double saturatedFatG) { this.saturatedFatG = saturatedFatG; }
+
+    public Double getCholesterolMg() { return cholesterolMg; }
+    public void setCholesterolMg(Double cholesterolMg) { this.cholesterolMg = cholesterolMg; }
+
+    public Double getSodiumMg() { return sodiumMg; }
+    public void setSodiumMg(Double sodiumMg) { this.sodiumMg = sodiumMg; }
+
+    public Double getTotalCarbohydratesG() { return totalCarbohydratesG; }
+    public void setTotalCarbohydratesG(Double totalCarbohydratesG) { this.totalCarbohydratesG = totalCarbohydratesG; }
+
+    public Double getDietaryFiberG() { return dietaryFiberG; }
+    public void setDietaryFiberG(Double dietaryFiberG) { this.dietaryFiberG = dietaryFiberG; }
+
+    public Double getSugarsG() { return sugarsG; }
+    public void setSugarsG(Double sugarsG) { this.sugarsG = sugarsG; }
+
+    public Double getProteinG() { return proteinG; }
+    public void setProteinG(Double proteinG) { this.proteinG = proteinG; }
 }

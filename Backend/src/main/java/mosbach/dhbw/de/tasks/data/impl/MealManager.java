@@ -12,8 +12,11 @@ import mosbach.dhbw.de.tasks.persistence.repo.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 @Service
 public class MealManager {
@@ -64,7 +67,8 @@ public class MealManager {
                 long rid = Long.parseLong(meal.getId());
                 recipe = recipeRepo.findById(rid).orElse(null);
             }
-        } catch (Exception ignored) { }
+        } catch (Exception ignored) {
+        }
 
         entry.setRecipe(recipe);
 
@@ -78,9 +82,19 @@ public class MealManager {
     @Transactional(readOnly = true)
     public List<TimeConv> readTime(UserConv user) {
         List<TimeConv> out = new ArrayList<>();
-        for (MealEntryEntity e : mealRepo.findByOwner_Email(user.getEmail())) {
+        for (MealEntryEntity e : mealRepo.findByOwner_EmailOrderByIdAsc(user.getEmail())) {
             out.add(new TimeConv(e.getDay(), e.getTime()));
         }
         return out;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Integer> readMealPlanRecipeIds(UserConv user) {
+        List<Integer> ids = new ArrayList<>();
+        for (MealEntryEntity e : mealRepo.findByOwner_EmailOrderByIdAsc(user.getEmail())) {
+            if (e.getRecipe() == null) ids.add(null);
+            else ids.add(Math.toIntExact(e.getRecipe().getId()));
+        }
+        return ids;
     }
 }

@@ -25,7 +25,7 @@ public class RecipeManager {
 
     // API-Konstanten (besser per ENV/Properties, aber wir halten es erstmal stabil)
     private static final String API_URL = "https://gustar-io-deutsche-rezepte.p.rapidapi.com/nutrition";
-    private static final String API_KEY = "PUT_YOUR_KEY_IN_ENV_LATER";
+    private static final String API_KEY = "98829c2a06msh35cace6f07ab36bp1938a6jsn4ff1672bcdff";
     private static final String API_HOST = "gustar-io-deutsche-rezepte.p.rapidapi.com";
 
     public RecipeManager(RecipeRepository recipeRepo, UserRepository userRepo) {
@@ -43,6 +43,7 @@ public class RecipeManager {
         e.setName(recipe.getName());
         e.setDescription(recipe.getDescription());
 
+        // Ingredients -> Entity
         List<IngredientValue> ingValues = new ArrayList<>();
         if (recipe.getIngredients() != null) {
             for (IngredientConv ing : recipe.getIngredients()) {
@@ -55,9 +56,48 @@ public class RecipeManager {
         }
         e.setIngredients(ingValues);
 
+        // --- Nutrition API call + store result (optional) ---
+        try {
+            List<String> names = new ArrayList<>();
+            List<Double> amounts = new ArrayList<>();
+
+            if (recipe.getIngredients() != null) {
+                for (IngredientConv ing : recipe.getIngredients()) {
+                    names.add(ing.getName());
+
+                    double amount = 0.0;
+                    if (ing.getAmount() != null) {
+                        String normalized = ing.getAmount().trim().replace(",", ".");
+                        try {
+                            amount = Double.parseDouble(normalized);
+                        } catch (NumberFormatException ignored) { }
+                    }
+                    amounts.add(amount);
+                }
+            }
+
+            String jsonPayload = generateIngredientString(names, amounts);
+            NutritionConv result = sendNutritionRequest(jsonPayload);
+
+            if (result != null) {
+                e.setCaloriesKcal(result.getCaloriesKcal());
+                e.setTotalFatG(result.getTotalFatG());
+                e.setSaturatedFatG(result.getSaturatedFatG());
+                e.setCholesterolMg(result.getCholesterolMg());
+                e.setSodiumMg(result.getSodiumMg());
+                e.setTotalCarbohydratesG(result.getTotalCarbohydratesG());
+                e.setDietaryFiberG(result.getDietaryFiberG());
+                e.setSugarsG(result.getSugarsG());
+                e.setProteinG(result.getProteinG());
+            }
+        } catch (Exception ex) {
+            // IMPORTANT: don’t throw, otherwise you rollback saving the recipe
+            System.err.println("Nutrition API failed, saving recipe without nutrition: " + ex.getMessage());
+        }
+
         RecipeEntity saved = recipeRepo.save(e);
 
-        // Conv updaten (wie vorher ID gesetzt wurde)
+        // Update conv like before
         recipe.setId(Math.toIntExact(saved.getId()));
         recipe.setOwner(user.getEmail());
     }
@@ -102,6 +142,36 @@ public class RecipeManager {
         }
 
         return new RecipeConv(Math.toIntExact(r.getId()), r.getName(), ingredients, r.getDescription());
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> readRecipeNamesByIds(List<Integer> recipeIds) {
+        if (recipeIds == null || recipeIds.isEmpty()) {
+            return List.of();
+        }
+
+        // Convert to Long list, but keep duplicates + order in original list
+        List<Long> ids = recipeIds.stream()
+                .filter(Objects::nonNull)
+                .map(Integer::longValue)
+                .toList();
+
+        // One DB call (may return in any order!)
+        Map<Long, String> nameById = new HashMap<>();
+        for (RecipeEntity r : recipeRepo.findAllById(ids)) {
+            nameById.put(r.getId(), r.getName());
+        }
+
+        // Rebuild list in the same order as recipeIds
+        List<String> names = new ArrayList<>(recipeIds.size());
+        for (Integer id : recipeIds) {
+            if (id == null) {
+                names.add("-"); // empty slot
+            } else {
+                names.add(nameById.getOrDefault(id.longValue(), "Unbekanntes Rezept"));
+            }
+        }
+        return names;
     }
 
     @Transactional(readOnly = true)

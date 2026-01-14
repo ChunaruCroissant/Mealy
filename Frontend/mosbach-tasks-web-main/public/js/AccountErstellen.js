@@ -2,6 +2,8 @@ $(document).ready(function() {
   $("#submit").click(function(event) {
     event.preventDefault();
 
+    const API = `${window.API_BASE}/api`;
+
     var loginData = {
       email: $("#email").val(),
       username: $("#username").val(),
@@ -21,7 +23,7 @@ $(document).ready(function() {
     console.log("Daten, die gesendet werden:", loginData);
 
     $.ajax({
-      url: 'https://MealyBackend-fearless-bushbuck-kc.apps.01.cf.eu01.stackit.cloud/api/register',
+      url: `${API}/register`,
       type: 'POST',
       dataType: 'json',
       contentType: 'application/json; charset=utf-8',

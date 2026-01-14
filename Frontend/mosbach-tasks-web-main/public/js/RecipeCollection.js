@@ -1,5 +1,6 @@
 $(document).ready(function() {
-    const apiUrl = 'https://MealyBackend-fearless-bushbuck-kc.apps.01.cf.eu01.stackit.cloud/api/collection';
+    const API = `${window.API_BASE}/api`;
+    const apiUrl = `${API}/collection`;
 
     function getToken() {
         const token = localStorage.getItem('token');

@@ -1,5 +1,6 @@
 $(document).ready(function() {
-    const apiUrl = 'https://MealyBackend-fearless-bushbuck-kc.apps.01.cf.eu01.stackit.cloud/api/recipe/detail';
+    const API = `${window.API_BASE}/api`;
+    const apiUrl = `${API}/recipe/detail`;
 
     function getToken() {
         const token = localStorage.getItem('token');
@@ -19,7 +20,7 @@ $(document).ready(function() {
 
     function fetchRecipeDetails(id) {
         $.ajax({
-            url: `https://MealyBackend-fearless-bushbuck-kc.apps.01.cf.eu01.stackit.cloud/api/recipe/detail/${id}`,
+            url: `${apiUrl}/${id}`,
             type: 'GET',
             headers: { 'token': getToken() },
             success: function(recipe) {
@@ -51,7 +52,7 @@ $(document).ready(function() {
 
     function deleteRecipe(id) {
         $.ajax({
-            url: `https://MealyBackend-fearless-bushbuck-kc.apps.01.cf.eu01.stackit.cloud/api/recipe/detail/${id}`,
+            url: `${apiUrl}/${id}`,
             type: 'DELETE',
             headers: { 'token': getToken() },
             success: function() {

@@ -1,5 +1,10 @@
 $(document).ready(function() {
 
+    // Die JS wird nirgends benutzt?? Wir haben ja schon Mealplan, dupe?
+    // Deprecated Implementation of Mealplan.js?
+
+    const API = `${window.API_BASE}/api`;
+
     const token = localStorage.getItem('authToken');
     if (!token) {
         alert('Bitte melde dich zuerst an.');

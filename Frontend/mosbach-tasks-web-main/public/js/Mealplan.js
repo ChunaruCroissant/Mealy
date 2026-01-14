@@ -1,5 +1,6 @@
 $(document).ready(function() {
-    const apiUrl = 'https://MealyBackend-fearless-bushbuck-kc.apps.01.cf.eu01.stackit.cloud/api/mealplan';
+    const API = `${window.API_BASE}/api`;
+    const apiUrl = `${API}/mealplan`;
 
     function getToken() {
         const token = localStorage.getItem('token');
@@ -66,7 +67,7 @@ $(document).ready(function() {
                 });
 
                 $.ajax({
-                    url: 'https://MealyBackend-fearless-bushbuck-kc.apps.01.cf.eu01.stackit.cloud/api/mealplan',
+                    url: apiUrl,
                     method: 'POST',
                     headers: { 'token': token },
                     data: JSON.stringify({
@@ -101,7 +102,7 @@ $(document).ready(function() {
 
     function removeMealFromDatabase(day, time) {
         $.ajax({
-            url: 'https://MealyBackend-fearless-bushbuck-kc.apps.01.cf.eu01.stackit.cloud/api/mealplan',
+            url: apiUrl,
             type: 'DELETE',
             headers: { 'token': token },
             data: JSON.stringify({
@@ -121,7 +122,7 @@ $(document).ready(function() {
 
     function loadMealsFromDatabase() {
         $.ajax({
-            url: 'https://MealyBackend-fearless-bushbuck-kc.apps.01.cf.eu01.stackit.cloud/api/mealplan',
+            url: apiUrl,
             type: 'GET',
             headers: { 'token': token },
             success: function(response) {

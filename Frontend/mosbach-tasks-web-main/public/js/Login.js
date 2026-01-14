@@ -2,6 +2,8 @@ $(document).ready(function() {
   $("#submitLogin").click(function(event) {
     event.preventDefault();
 
+    const API = `${window.API_BASE}/api`;
+
     var loginData = {
       userName: $("#userName").val(),
       password: $("#password").val()
@@ -16,7 +18,7 @@ $(document).ready(function() {
     console.log("Login-Daten gesammelt:", loginData);
 
     $.ajax({
-      url: 'https://MealyBackend-fearless-bushbuck-kc.apps.01.cf.eu01.stackit.cloud/api/login',
+      url: `${API}/login`,
       type: 'POST',
       dataType: 'json',
       contentType: 'application/json; charset=utf-8',
@@ -25,6 +27,7 @@ $(document).ready(function() {
         console.log("Antwort von der API erhalten:", data);
         if (data.token) {
           localStorage.setItem('authToken', data.token);
+          localStorage.setItem("token", data.token);
           console.log("Token erfolgreich gespeichert:", data.token);
 
           window.location.href = 'Hompage2.html';

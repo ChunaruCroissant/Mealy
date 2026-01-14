@@ -3,6 +3,8 @@ const tokenValue = '123';
 localStorage.setItem('token', tokenValue);
 console.log('Token set:', tokenValue);
 
+const API = `${window.API_BASE}/api`;
+
 $(document).ready(function() {
   $('#recipe-form').on('submit', function(event) {
     event.preventDefault();
@@ -38,7 +40,7 @@ $(document).ready(function() {
     };
 
     $.ajax({
-      url: 'https://mealybackend-fearless-bushbuck-kc.apps.01.cf.eu01.stackit.cloud/api/recipe',
+      url: `${API}/recipe`,
       type: 'POST',
       contentType: 'application/json',
       data: JSON.stringify(recipeData),

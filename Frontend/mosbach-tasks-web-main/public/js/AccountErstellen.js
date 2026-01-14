@@ -6,7 +6,7 @@ $(document).ready(function() {
 
     var loginData = {
       email: $("#email").val(),
-      username: $("#username").val(),
+      userName: $("#username").val(), //bruh -RL
       password: $("#password").val(),
       passwordConfirm: $("#passwordConfirm").val(),
     };
@@ -38,10 +38,12 @@ $(document).ready(function() {
           alert(response.reason || "Registrierung fehlgeschlagen");
         }
       },
-      error: function(xhr, ajaxOptions, thrownError) {
-        console.log('Fehlerstatus: ' + xhr.status);
-        console.log('Fehlerdetails:', thrownError);
-        alert('Ein Fehler ist bei der Registrierung aufgetreten: ' + xhr.status + ' ' + thrownError);
+      //Return Error Info to User
+      error: function(xhr)  {
+        console.log("Fehlerstatus:", xhr.status);
+        console.log("Response:", xhr.responseJSON || xhr.responseText);
+        const msg = xhr.responseJSON?.reason || xhr.responseText || "Unbekannter Fehler";
+        alert("Registrierung fehlgeschlagen: " + msg);
       }
     });
   });

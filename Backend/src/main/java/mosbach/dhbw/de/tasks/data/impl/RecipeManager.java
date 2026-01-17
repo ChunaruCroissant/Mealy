@@ -25,7 +25,7 @@ public class RecipeManager {
 
     // API-Konstanten (besser per ENV/Properties, aber wir halten es erstmal stabil)
     private static final String API_URL = "https://gustar-io-deutsche-rezepte.p.rapidapi.com/nutrition";
-    private static final String API_KEY = "98829c2a06msh35cace6f07ab36bp1938a6jsn4ff1672bcdff";
+    private static final String API_KEY = "dcd8cb5caemsh334466942801b1cp1fc496jsne3b222ee9475";
     private static final String API_HOST = "gustar-io-deutsche-rezepte.p.rapidapi.com";
 
     public RecipeManager(RecipeRepository recipeRepo, UserRepository userRepo) {

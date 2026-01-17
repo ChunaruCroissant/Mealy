@@ -145,6 +145,74 @@ public class RecipeManager {
     }
 
     @Transactional(readOnly = true)
+    public RecipeConv readRecipeByIdForOwner(int recipeId, UserConv user) {
+        if (user == null || user.getEmail() == null) return null;
+        RecipeEntity r = recipeRepo.findByIdAndOwner_Email((long) recipeId, user.getEmail()).orElse(null);
+        if (r == null) return null;
+
+        List<IngredientConv> ingredients = new ArrayList<>();
+        if (r.getIngredients() != null) {
+            for (IngredientValue v : r.getIngredients()) {
+                ingredients.add(new IngredientConv(v.getName(), v.getUnit(), v.getAmount()));
+            }
+        }
+        return new RecipeConv(Math.toIntExact(r.getId()), r.getName(), ingredients, r.getDescription());
+    }
+
+    @Transactional
+    public boolean deleteRecipeOwned(long recipeId, UserConv user) {
+        if (user == null || user.getEmail() == null) return false;
+        RecipeEntity r = recipeRepo.findByIdAndOwner_Email(recipeId, user.getEmail()).orElse(null);
+        if (r == null) return false;
+        recipeRepo.delete(r);
+        return true;
+    }
+
+    @Transactional
+    public boolean setRecipeShared(long recipeId, UserConv user, boolean shared) {
+        if (user == null || user.getEmail() == null) return false;
+        RecipeEntity r = recipeRepo.findByIdAndOwner_Email(recipeId, user.getEmail()).orElse(null);
+        if (r == null) return false;
+        r.setShared(shared);
+        recipeRepo.save(r);
+        return true;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> listSharedRecipes() {
+        List<Map<String, Object>> out = new ArrayList<>();
+        for (RecipeEntity r : recipeRepo.findBySharedTrueOrderByIdAsc()) {
+            Map<String, Object> row = new LinkedHashMap<>();
+            row.put("id", r.getId());
+            row.put("name", r.getName());
+            // owner is useful for UI/debugging; you can remove later
+            row.put("owner", r.getOwner() != null ? r.getOwner().getEmail() : null);
+            out.add(row);
+        }
+        return out;
+    }
+
+    @Transactional(readOnly = true)
+    public RecipeConv readSharedRecipeById(long recipeId) {
+        RecipeEntity r = recipeRepo.findByIdAndSharedTrue(recipeId).orElse(null);
+        if (r == null) return null;
+
+        List<IngredientConv> ingredients = new ArrayList<>();
+        if (r.getIngredients() != null) {
+            for (IngredientValue v : r.getIngredients()) {
+                ingredients.add(new IngredientConv(v.getName(), v.getUnit(), v.getAmount()));
+            }
+        }
+        return new RecipeConv(Math.toIntExact(r.getId()), r.getName(), ingredients, r.getDescription());
+    }
+
+    @Transactional
+    public long deleteRecipesByUserEmail(String email) {
+        if (email == null || email.isBlank()) return 0;
+        return recipeRepo.deleteByOwner_Email(email);
+    }
+
+    @Transactional(readOnly = true)
     public List<String> readRecipeNamesByIds(List<Integer> recipeIds) {
         if (recipeIds == null || recipeIds.isEmpty()) {
             return List.of();
@@ -211,7 +279,7 @@ public class RecipeManager {
             if (i < names.size() - 1) jsonBuilder.append(",");
         }
 
-        jsonBuilder.append("],\"portions\":4}");
+        jsonBuilder.append("],\"portions\":1}");
         return jsonBuilder.toString();
     }
 

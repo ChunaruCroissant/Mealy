@@ -22,6 +22,10 @@ public class RecipeEntity {
     @Column(columnDefinition = "text")
     private String description;
 
+    // Whether this recipe is publicly shared (community page)
+    @Column(nullable = false)
+    private boolean shared = false;
+
     // --- Nutrition (nullable, because API may fail / not present) ---
     @Column(name = "calories_kcal")
     private Double caloriesKcal;
@@ -79,6 +83,14 @@ public class RecipeEntity {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public boolean isShared() {
+        return shared;
+    }
+
+    public void setShared(boolean shared) {
+        this.shared = shared;
     }
 
     public String getName() {

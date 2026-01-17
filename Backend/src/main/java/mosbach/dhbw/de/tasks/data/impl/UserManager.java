@@ -74,7 +74,11 @@ public class UserManager {
                 if (key.matches("Auth\\.\\d+\\.Token")) {
                     String id = key.split("\\.")[1];
                     String storedToken = properties.getProperty("Auth." + id + ".Token");
-                    if (Token.equals(storedToken)) return true;
+                    if (Token.equals(storedToken)) {
+                        String storedEmail = properties.getProperty("Auth." + id + ".Email");
+                        // Token is only valid if mapped user still exists in DB
+                        return storedEmail != null && userRepo.existsByEmail(storedEmail);
+                    }
                 }
             }
         } catch (IOException ignored) { }
@@ -103,6 +107,42 @@ public class UserManager {
             }
         } catch (IOException ignored) { }
         return null;
+    }
+
+    @Transactional
+    public boolean updateUserForTokenOwner(UserConv tokenOwner, UserConv update) {
+        if (tokenOwner == null || tokenOwner.getEmail() == null) return false;
+        UserEntity e = userRepo.findByEmail(tokenOwner.getEmail()).orElse(null);
+        if (e == null) return false;
+
+        if (update != null) {
+            if (update.getUserName() != null && !update.getUserName().isBlank()) {
+                e.setUserName(update.getUserName());
+            }
+
+            // IMPORTANT: email changes are not supported until we have real tokens/JWT,
+            // because token.properties would still point to the old email.
+            if (update.getEmail() != null && !update.getEmail().isBlank() && !update.getEmail().equals(e.getEmail())) {
+                throw new IllegalArgumentException("Email change is not supported yet");
+            }
+
+            if (update.getPassword() != null && !update.getPassword().isBlank()) {
+                // Minimal-Drift: still plain. Later: BCrypt.
+                e.setPasswordHash(update.getPassword());
+            }
+        }
+
+        userRepo.save(e);
+        return true;
+    }
+
+    @Transactional
+    public boolean deleteUserByEmail(String email) {
+        if (email == null || email.isBlank()) return false;
+        UserEntity e = userRepo.findByEmail(email).orElse(null);
+        if (e == null) return false;
+        userRepo.delete(e);
+        return true;
     }
 
     private boolean passwordsMatch(String raw, String stored) {

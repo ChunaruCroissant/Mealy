@@ -12,6 +12,10 @@ public interface MealEntryRepository extends JpaRepository<MealEntryEntity, Long
     List<MealEntryEntity> findByOwner_Email(String email);
     List<MealEntryEntity> findByOwner_EmailOrderByIdAsc(String email);
     Optional<MealEntryEntity> findByOwner_EmailAndDayAndTime(String email, String day, String time);
+
+    long deleteByOwner_Email(String email);
+    long deleteByOwner_EmailAndDayAndTime(String email, String day, String time);
+    long deleteByOwner_EmailAndRecipe_Id(String email, Long recipeId);
     @Query("""
         select m.recipe.id
         from MealEntryEntity m

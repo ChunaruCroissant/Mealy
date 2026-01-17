@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Community-Rezeptdetails - Mealy</title>
+
+  <link rel="icon" href="../Logo/Mealy-Favicon.ico" />
+  <link rel="stylesheet" href="../../../../Mealy/Frontend/mosbach-tasks-web-main/public/css/sharedRecipeDetail.css" />
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="../js/sharedRecipeDetail.js"></script>
+</head>
+<body>
+
+<header>
+  <nav class="navbar">
+    <ul>
+      <li><a href="Hompage2.html">HOME</a></li>
+      <li><a href="RecipeCollection.html">REZEPTSAMMLUNG</a></li>
+      <li><a href="Mealplan.html">MEALPLAN</a></li>
+      <li><a href="Profile.html">PROFIL</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main class="page">
+  <div class="recipe-detail-container">
+    <h1 id="recipe-name"></h1>
+
+    <img id="recipe-image" class="recipe-image" alt="Rezeptbild" style="display:none;" />
+
+    <p id="recipe-description"></p>
+
+    <h3>Zutaten:</h3>
+    <ul id="ingredient-list"></ul>
+
+    <div class="footer-links">
+      <a href="SharedRecipes.html" id="backToShared">&larr; Zurück zu Community-Rezepten</a>
+    </div>
+  </div>
+</main>
+
+</body>
+</html>

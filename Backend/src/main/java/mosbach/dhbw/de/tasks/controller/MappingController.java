@@ -32,6 +32,16 @@ public class MappingController {
         this.mealManager = mealManager;
     }
 
+    private String extractToken(String tokenHeader, String authorizationHeader) {
+        if (tokenHeader != null && !tokenHeader.isBlank()) return tokenHeader;
+        if (authorizationHeader == null || authorizationHeader.isBlank()) return null;
+        String a = authorizationHeader.trim();
+        if (a.regionMatches(true, 0, "Bearer ", 0, 7)) {
+            return a.substring(7).trim();
+        }
+        return a;
+    }
+
     @PostMapping(
             path = "/register",
             consumes = {MediaType.APPLICATION_JSON_VALUE}
@@ -72,16 +82,93 @@ public class MappingController {
     }
 
     @GetMapping("/user")
-    public ResponseEntity<?> getUser(@RequestHeader("Authorization") String data){
-        data="123";
-        TokenConv t = new TokenConv(data);
+    public ResponseEntity<?> getUser(
+            @RequestHeader(value = "token", required = false) String tokenHeader,
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
 
-        if (userManger.checkToken(t)==true)
-        {
-            return ResponseEntity.ok(userManger.TokenToUser(data));
+        String token = extractToken(tokenHeader, authorizationHeader);
+        if (token == null || token.isBlank()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("reason", "Missing token"));
         }
-        else return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("reason", "Wrong token"));
 
+        TokenConv t = new TokenConv(token);
+        if (!userManger.checkToken(t)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("reason", "Wrong token"));
+        }
+
+        UserConv u = userManger.TokenToUser(token);
+        if (u == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("reason", "User not found"));
+        }
+        // Do not return password hash
+        u.setPassword(null);
+        return ResponseEntity.ok(u);
+    }
+
+    @PutMapping(
+            path = "/user",
+            consumes = {MediaType.APPLICATION_JSON_VALUE}
+    )
+    public ResponseEntity<?> updateUser(
+            @RequestHeader(value = "token", required = false) String tokenHeader,
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+            @RequestBody UserConv update) {
+
+        String token = extractToken(tokenHeader, authorizationHeader);
+        if (token == null || token.isBlank()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("reason", "Missing token"));
+        }
+
+        TokenConv t = new TokenConv(token);
+        if (!userManger.checkToken(t)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("reason", "Wrong token"));
+        }
+
+        UserConv owner = userManger.TokenToUser(token);
+        if (owner == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("reason", "User not found"));
+        }
+
+        try {
+            boolean ok = userManger.updateUserForTokenOwner(owner, update);
+            if (!ok) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("reason", "Update failed"));
+            }
+            return ResponseEntity.ok(Map.of("message", "Account details successfully changed"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("reason", e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/user")
+    public ResponseEntity<?> deleteUser(
+            @RequestHeader(value = "token", required = false) String tokenHeader,
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
+
+        String token = extractToken(tokenHeader, authorizationHeader);
+        if (token == null || token.isBlank()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("reason", "Missing token"));
+        }
+
+        TokenConv t = new TokenConv(token);
+        if (!userManger.checkToken(t)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("reason", "Wrong token"));
+        }
+
+        UserConv owner = userManger.TokenToUser(token);
+        if (owner == null || owner.getEmail() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("reason", "User not found"));
+        }
+
+        // Delete dependent data first (FK constraints)
+        mealManager.deleteMealsByUserEmail(owner.getEmail());
+        recipeManager.deleteRecipesByUserEmail(owner.getEmail());
+
+        boolean deleted = userManger.deleteUserByEmail(owner.getEmail());
+        if (deleted) {
+            return ResponseEntity.ok(Map.of("message", "Account successfully deleted"));
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("reason", "Account could not be deleted"));
     }
 
 
@@ -107,7 +194,6 @@ public class MappingController {
 
     @GetMapping("/collection")
     public ResponseEntity<?> getRecepes(@RequestHeader("token") String data){
-        data="123";
         TokenConv t = new TokenConv(data);
 
         if (userManger.checkToken(t)==true)
@@ -119,23 +205,47 @@ public class MappingController {
     }
 
     @GetMapping("recipe/detail/{id}")
-    public ResponseEntity<?> getRecipeById( @PathVariable int id, @RequestHeader("token") String data) {
-        data="123";
-        TokenConv t = new TokenConv(data);
+    public ResponseEntity<?> getRecipeById(@PathVariable int id, @RequestHeader("token") String token) {
+        TokenConv t = new TokenConv(token);
 
-        if (userManger.checkToken(t)==true) {
-            // Je nach Wert der ID eine unterschiedliche Antwort
-            return ResponseEntity.ok(recipeManager.readRecipeById(id));
+        if (!userManger.checkToken(t)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("reason", "Wrong Token"));
         }
-        else return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("reason", "Wrong Token"));
 
+        UserConv user = userManger.TokenToUser(token);
+        RecipeConv r = recipeManager.readRecipeByIdForOwner(id, user);
+        if (r == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("reason", "Recipe not found"));
+        }
+        return ResponseEntity.ok(r);
+    }
+
+    @DeleteMapping("recipe/detail/{id}")
+    public ResponseEntity<?> deleteRecipeById(@PathVariable long id, @RequestHeader("token") String token) {
+        TokenConv t = new TokenConv(token);
+        if (!userManger.checkToken(t)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("reason", "Wrong Token"));
+        }
+
+        UserConv user = userManger.TokenToUser(token);
+        if (user == null || user.getEmail() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("reason", "User not found"));
+        }
+
+        // Clear mealplan references first (FK)
+        mealManager.deleteMealsByRecipe(user, id);
+
+        boolean deleted = recipeManager.deleteRecipeOwned(id, user);
+        if (deleted) {
+            return ResponseEntity.ok(Map.of("message", "Recipe successfully deleted"));
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("reason", "Recipe not found"));
     }
 
 
     @GetMapping("/mealplan")
     public ResponseEntity<?> getMeals(@RequestHeader("token") String data) {
         try {
-            data = "123"; // Zum Testen, später durch den echten Token ersetzen
             TokenConv t = new TokenConv(data);
 
             if (!userManger.checkToken(t)) {
@@ -232,7 +342,6 @@ public class MappingController {
             @RequestHeader("token") String token,
             @RequestBody MealplanConv recipe) {
 
-        token="123";
         TokenConv t = new TokenConv(token);
 
         if (userManger.checkToken(t)==true)
@@ -241,6 +350,78 @@ public class MappingController {
             return ResponseEntity.ok("Recipe successfully added to meal plan");
         }
         else return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("reason", "Wrong Token"));
+    }
+
+    @DeleteMapping(
+            path = "/mealplan",
+            consumes = {MediaType.APPLICATION_JSON_VALUE}
+    )
+    public ResponseEntity<?> deleteMealFromMealplan(
+            @RequestHeader("token") String token,
+            @RequestBody Map<String, String> payload) {
+
+        TokenConv t = new TokenConv(token);
+        if (!userManger.checkToken(t)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("reason", "Wrong Token"));
+        }
+
+        UserConv user = userManger.TokenToUser(token);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("reason", "User not found"));
+        }
+
+        String day = payload != null ? payload.get("day") : null;
+        String time = payload != null ? payload.get("time") : null;
+
+        boolean deleted = mealManager.deleteMealSlot(user, day, time);
+        if (deleted) {
+            return ResponseEntity.ok(Map.of("message", "Meal successfully removed"));
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("reason", "Meal entry not found"));
+    }
+
+    // ---- Recipe sharing (community) ----
+
+    @GetMapping("/shared-recipes")
+    public ResponseEntity<?> listSharedRecipes() {
+        return ResponseEntity.ok(recipeManager.listSharedRecipes());
+    }
+
+    @GetMapping("/shared-recipes/{id}")
+    public ResponseEntity<?> getSharedRecipe(@PathVariable long id) {
+        RecipeConv r = recipeManager.readSharedRecipeById(id);
+        if (r == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("reason", "Shared recipe not found"));
+        }
+        return ResponseEntity.ok(r);
+    }
+
+    @PostMapping("/recipe/{id}/share")
+    public ResponseEntity<?> shareRecipe(@PathVariable long id, @RequestHeader("token") String token) {
+        TokenConv t = new TokenConv(token);
+        if (!userManger.checkToken(t)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("reason", "Wrong Token"));
+        }
+        UserConv user = userManger.TokenToUser(token);
+        boolean ok = recipeManager.setRecipeShared(id, user, true);
+        if (!ok) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("reason", "Recipe not found"));
+        }
+        return ResponseEntity.ok(Map.of("message", "Recipe shared", "shared", true));
+    }
+
+    @DeleteMapping("/recipe/{id}/share")
+    public ResponseEntity<?> unshareRecipe(@PathVariable long id, @RequestHeader("token") String token) {
+        TokenConv t = new TokenConv(token);
+        if (!userManger.checkToken(t)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("reason", "Wrong Token"));
+        }
+        UserConv user = userManger.TokenToUser(token);
+        boolean ok = recipeManager.setRecipeShared(id, user, false);
+        if (!ok) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("reason", "Recipe not found"));
+        }
+        return ResponseEntity.ok(Map.of("message", "Recipe unshared", "shared", false));
     }
 
     @GetMapping("/health")

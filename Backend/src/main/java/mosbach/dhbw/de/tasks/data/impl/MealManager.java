@@ -97,4 +97,23 @@ public class MealManager {
         }
         return ids;
     }
+
+    @Transactional
+    public boolean deleteMealSlot(UserConv user, String day, String time) {
+        if (user == null || user.getEmail() == null) return false;
+        if (day == null || day.isBlank() || time == null || time.isBlank()) return false;
+        return mealRepo.deleteByOwner_EmailAndDayAndTime(user.getEmail(), day, time) > 0;
+    }
+
+    @Transactional
+    public void deleteMealsByRecipe(UserConv user, long recipeId) {
+        if (user == null || user.getEmail() == null) return;
+        mealRepo.deleteByOwner_EmailAndRecipe_Id(user.getEmail(), recipeId);
+    }
+
+    @Transactional
+    public void deleteMealsByUserEmail(String email) {
+        if (email == null || email.isBlank()) return;
+        mealRepo.deleteByOwner_Email(email);
+    }
 }

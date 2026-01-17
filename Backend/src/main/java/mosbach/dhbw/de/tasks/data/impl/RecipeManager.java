@@ -211,7 +211,7 @@ public class RecipeManager {
             if (i < names.size() - 1) jsonBuilder.append(",");
         }
 
-        jsonBuilder.append("],\"portions\":4}");
+        jsonBuilder.append("],\"portions\":1}");
         return jsonBuilder.toString();
     }
 

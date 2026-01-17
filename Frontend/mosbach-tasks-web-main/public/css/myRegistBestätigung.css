@@ -1,7 +1,6 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #e0f7f5; /* Helles Türkis für Hintergrund */
-    display: flex;
+    background-color: #e0f7f5;     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;

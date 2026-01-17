@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community-Rezepte - Mealy</title>
+    
+    <link rel="stylesheet" href="../css/myRecipeCollection.css">
+    <link rel="stylesheet" href="../css/sharedRecipes.css">
+    
+    <link rel="icon" href="../Logo/Mealy-Favicon.ico">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/SharedRecipes.js"></script>
+</head>
+<body>
+
+<header>
+    <nav class="navbar">
+        <ul>
+            <li><a href="Hompage2.html">HOME</a></li>
+            <li><a href="RecipeCollection.html">REZEPTSAMMLUNG</a></li>
+            <li><a href="Mealplan.html">MEALPLAN</a></li>
+            <li><a href="Profile.html">PROFIL</a></li>
+        </ul>
+    </nav>
+</header>
+
+<div class="recipe-container">
+    <h1 class="recipe-title shared-title">Community-Rezepte</h1>
+    
+    <div id="shared-list" class="recipe-list"></div>
+</div>
+
+<div id="ratingModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        
+        <h2 id="modalRecipeTitle">Rezept bewerten</h2>
+        <p class="modal-subtitle">Wie hat es dir geschmeckt?</p>
+
+        <form id="ratingForm">
+            <input type="hidden" id="ratingRecipeId" name="recipe_id">
+            <input type="hidden" id="ratingRecipeName" name="recipe_name">
+
+            <div class="star-rating-input">
+                <input type="radio" id="star5" name="rating" value="5"><label for="star5" title="5 Sterne">★</label>
+                <input type="radio" id="star4" name="rating" value="4"><label for="star4" title="4 Sterne">★</label>
+                <input type="radio" id="star3" name="rating" value="3"><label for="star3" title="3 Sterne">★</label>
+                <input type="radio" id="star2" name="rating" value="2"><label for="star2" title="2 Sterne">★</label>
+                <input type="radio" id="star1" name="rating" value="1"><label for="star1" title="1 Stern">★</label>
+            </div>
+
+            <div class="form-group">
+                <label for="ratingComment">Deine Meinung (optional):</label>
+                <textarea id="ratingComment" rows="4" placeholder="Was mochtest du besonders?"></textarea>
+            </div>
+
+            <button type="submit" class="submit-rating-btn">Bewertung absenden</button>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>
